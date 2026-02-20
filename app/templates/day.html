@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ day.week.block.period.name }} • Block {{ day.week.block.number }} • Week {{ day.week.number }} • {{ day.label or ("Day " ~ day.number) }}</h2>
+  <div class="body">
+    <div class="row space">
+      <a class="btn secondary" href="{{ url_for('main.week_view', week_id=day.week.id) }}">Back</a>
+    </div>
+
+    {% if current_user.role == "coach" %}
+    <form method="post" action="{{ url_for('main.exercise_create') }}" style="margin-top:12px">
+      <input type="hidden" name="day_id" value="{{ day.id }}">
+      <label>Exercise name</label>
+      <input name="name" placeholder="e.g. Squat" required />
+      <label>Work (optional)</label>
+      <textarea name="work" rows="3" placeholder="Top set: 180×3 @8&#10;Backoff: 3×3 @170"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" type="submit">Add exercise</button>
+      </div>
+    </form>
+    {% else %}
+      <div class="hint">Select an exercise to upload video + add comments.</div>
+    {% endif %}
+
+    <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+    <div class="list">
+      {% for e in day.exercises %}
+        <div class="item">
+          <div class="item-title"><a href="{{ url_for('main.entry_view', entry_id=e.id) }}">{{ e.name }}</a></div>
+          <div class="item-sub">{{ (e.media|length) }} media • updated {{ e.updated_at.strftime("%Y-%m-%d %H:%M") if e.updated_at else "" }}</div>
+          {% if current_user.role == "coach" %}
+          <div class="item-actions">
+            <form method="post" action="{{ url_for('main.exercise_delete', entry_id=e.id) }}" onsubmit="return confirm('Delete exercise entry?')">
+              <button class="btn danger" type="submit">Delete</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="hint">No exercises yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

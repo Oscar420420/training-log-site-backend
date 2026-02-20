@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ period.name }}</h2>
+  <div class="body">
+    <div class="row space">
+      <a class="btn secondary" href="{{ url_for('main.index') }}">Back</a>
+    </div>
+
+    {% if current_user.role == "coach" %}
+    <form class="row" method="post" action="{{ url_for('main.block_create') }}" style="margin-top:12px">
+      <input type="hidden" name="period_id" value="{{ period.id }}">
+      <div style="flex:1; min-width: 220px;">
+        <label>New block number</label>
+        <input name="number" type="number" min="1" step="1" required />
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn" type="submit">Add block</button>
+      </div>
+    </form>
+    {% endif %}
+
+    <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+    <div class="list">
+      {% for b in period.blocks %}
+        <div class="item">
+          <div class="item-title"><a href="{{ url_for('main.block_view', block_id=b.id) }}">Block {{ b.number }}</a></div>
+          <div class="item-sub">{{ b.weeks|length }} weeks</div>
+          {% if current_user.role == "coach" %}
+          <div class="item-actions">
+            <form method="post" action="{{ url_for('main.block_delete', block_id=b.id) }}" onsubmit="return confirm('Delete block and all inside?')">
+              <button class="btn danger" type="submit">Delete</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="hint">No blocks yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

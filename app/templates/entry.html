@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ entry.day.week.block.period.name }} • Block {{ entry.day.week.block.number }} • Week {{ entry.day.week.number }} • {{ entry.day.label or ("Day " ~ entry.day.number) }} • {{ entry.name }}</h2>
+  <div class="body">
+    <div class="row space">
+      <a class="btn secondary" href="{{ url_for('main.day_view', day_id=entry.day.id) }}">Back</a>
+    </div>
+
+    <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+    <div class="grid">
+      <div class="card" style="box-shadow:none">
+        <h2>Work + comments</h2>
+        <div class="body">
+          <form method="post" action="{{ url_for('main.exercise_update', entry_id=entry.id) }}">
+            {% if current_user.role == "coach" %}
+              <label>Work</label>
+              <textarea name="work" rows="4">{{ entry.work or "" }}</textarea>
+            {% else %}
+              <div class="hint"><b>Work</b> is coach-controlled.</div>
+              <div class="media" style="margin-top:8px">{{ entry.work or "(no work set)" }}</div>
+            {% endif %}
+
+            <label>Lifter comment</label>
+            <textarea name="lifter_comment" rows="5" {% if current_user.role != "coach" %}required{% endif %}>{{ entry.lifter_comment or "" }}</textarea>
+
+            {% if current_user.role == "coach" %}
+              <label>Coach feedback</label>
+              <textarea name="coach_comment" rows="5">{{ entry.coach_comment or "" }}</textarea>
+            {% else %}
+              <div class="hint"><b>Coach feedback</b> is visible once coach writes it.</div>
+              <div class="media" style="margin-top:8px">{{ entry.coach_comment or "(none yet)" }}</div>
+            {% endif %}
+
+            <div class="row" style="margin-top:10px">
+              <button class="btn" type="submit">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card" style="box-shadow:none">
+        <h2>Media</h2>
+        <div class="body">
+          <form method="post" action="{{ url_for('main.media_upload', entry_id=entry.id) }}" enctype="multipart/form-data">
+            <label>Upload high-quality video/photo (from phone works great)</label>
+            <input type="file" name="file" accept="video/*,image/*" required />
+            <div class="row" style="margin-top:10px">
+              <button class="btn" type="submit">Upload</button>
+            </div>
+            <div class="hint">Uploads are stored on the server. Your host must provide persistent storage (Render disk / Fly volume).</div>
+          </form>
+
+          <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+          <form method="post" action="{{ url_for('main.media_link', entry_id=entry.id) }}">
+            <label>Or add a link (YouTube/Drive)</label>
+            <input name="url" placeholder="https://..." />
+            <div class="row" style="margin-top:10px">
+              <button class="btn secondary" type="submit">Add link</button>
+            </div>
+          </form>
+
+          <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+          <div class="list">
+            {% for m in entry.media %}
+              <div class="media">
+                <div class="item-title">{{ m.kind|upper }} {% if m.original_name %}• {{ m.original_name }}{% endif %}</div>
+                <div class="item-sub">{{ m.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+
+                {% if m.kind == "link" %}
+                  {% if "youtube.com" in m.url or "youtu.be" in m.url %}
+                    {# Lightweight embed: convert watch?v= to embed in JS would be nicer, but keep it simple here #}
+                    <div class="hint" style="margin-top:6px"><a href="{{ m.url }}" target="_blank" rel="noopener">Open link</a></div>
+                  {% else %}
+                    <div class="hint" style="margin-top:6px"><a href="{{ m.url }}" target="_blank" rel="noopener">Open link</a></div>
+                  {% endif %}
+                {% else %}
+                  {% set url = m.url %}
+                  {% if url.endswith(".jpg") or url.endswith(".jpeg") or url.endswith(".png") or url.endswith(".webp") or url.startswith("data:image") %}
+                    <img src="{{ url }}" alt="upload"/>
+                  {% else %}
+                    <video controls playsinline src="{{ url }}"></video>
+                  {% endif %}
+                  <div class="hint" style="margin-top:6px"><a href="{{ url }}" target="_blank" rel="noopener">Open file</a></div>
+                {% endif %}
+
+                {% if current_user.role == "coach" %}
+                  <form method="post" action="{{ url_for('main.media_delete', media_id=m.id) }}" onsubmit="return confirm('Delete this media?')">
+                    <button class="btn danger" type="submit" style="margin-top:10px">Delete</button>
+                  </form>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="hint">No media yet. Upload a file or add a link.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

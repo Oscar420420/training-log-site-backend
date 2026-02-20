@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid">
+  <div class="card">
+    <h2>Training periods</h2>
+    <div class="body">
+      {% if current_user.role == "coach" %}
+      <form class="row" method="post" action="{{ url_for('main.period_create') }}">
+        <div style="flex:1; min-width: 220px;">
+          <label>New period name</label>
+          <input name="name" placeholder="e.g. Serie 2 2026" required />
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" type="submit">Add period</button>
+        </div>
+      </form>
+      <div class="hint">Coach can create/delete structure. Lifter can comment + upload media.</div>
+      <div class="hint">High-quality uploads work best if your host provides persistent disk storage.</div>
+      {% else %}
+      <div class="hint">Select a period to browse. You can add lifter comments + upload media to entries.</div>
+      {% endif %}
+
+      <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+      <div class="list">
+        {% for p in periods %}
+          <div class="item">
+            <div class="item-title"><a href="{{ url_for('main.period_view', period_id=p.id) }}">{{ p.name }}</a></div>
+            <div class="item-sub">{{ p.blocks|length }} blocks</div>
+            {% if current_user.role == "coach" %}
+            <div class="item-actions">
+              <form method="post" action="{{ url_for('main.period_delete', period_id=p.id) }}" onsubmit="return confirm('Delete period and all inside?')">
+                <button class="btn danger" type="submit">Delete</button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="hint">No periods yet. Coach: add one above.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>How to use</h2>
+    <div class="body">
+      <ol class="hint">
+        <li>Coach creates structure: period → block → week → day → exercise.</li>
+        <li>Lifter uploads videos and writes a lifter comment.</li>
+        <li>Coach adds feedback in the coach comment box.</li>
+      </ol>
+      <div class="hint">
+        This version stores everything in a database, shared across devices.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Login</h2>
+  <div class="body">
+    <form method="post" action="{{ url_for('auth.login_post') }}">
+      <label>Username</label>
+      <input name="username" autocomplete="username" required />
+
+      <label>Password</label>
+      <input type="password" name="password" autocomplete="current-password" required />
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn" type="submit">Login</button>
+      </div>
+
+      <div class="hint" style="margin-top:12px">
+        Tip (local dev): set users in <code>.env</code> using BOOTSTRAP_COACH_* and BOOTSTRAP_LIFTER_*.
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

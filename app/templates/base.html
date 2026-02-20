@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ title or "Training Log" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">Training Log + Video Vault</div>
+      <div class="sub">Backend version: accounts + shared comments + uploads</div>
+    </div>
+    <div class="row">
+      {% if current_user.is_authenticated %}
+        <a class="btn secondary" href="{{ url_for('main.index') }}">Home</a>
+        <span class="hint">Logged in as <b>{{ current_user.username }}</b> ({{ current_user.role }})</span>
+        <a class="btn secondary" href="{{ url_for('auth.logout') }}">Logout</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="flash {{cat}}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

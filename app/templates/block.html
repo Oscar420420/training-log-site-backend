@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ block.period.name }} • Block {{ block.number }}</h2>
+  <div class="body">
+    <div class="row space">
+      <a class="btn secondary" href="{{ url_for('main.period_view', period_id=block.period.id) }}">Back</a>
+    </div>
+
+    {% if current_user.role == "coach" %}
+    <form class="row" method="post" action="{{ url_for('main.week_create') }}" style="margin-top:12px">
+      <input type="hidden" name="block_id" value="{{ block.id }}">
+      <div style="flex:1; min-width: 220px;">
+        <label>New week number</label>
+        <input name="number" type="number" min="1" step="1" required />
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn" type="submit">Add week</button>
+      </div>
+    </form>
+    {% endif %}
+
+    <div style="height:1px;background:var(--line);margin:12px 0;opacity:.85"></div>
+
+    <div class="list">
+      {% for w in block.weeks %}
+        <div class="item">
+          <div class="item-title"><a href="{{ url_for('main.week_view', week_id=w.id) }}">Week {{ w.number }}</a></div>
+          <div class="item-sub">{{ w.days|length }} days</div>
+          {% if current_user.role == "coach" %}
+          <div class="item-actions">
+            <form method="post" action="{{ url_for('main.week_delete', week_id=w.id) }}" onsubmit="return confirm('Delete week and all inside?')">
+              <button class="btn danger" type="submit">Delete</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="hint">No weeks yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
